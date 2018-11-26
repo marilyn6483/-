@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 
 def creat_data():
@@ -11,15 +12,22 @@ def creat_data():
     return datasets, labels
 
 
-def shannon_ent(datasets, labels):
+def shannon_ent(datasets):
+    """
+    计算数据集的信息熵
+    :param datasets:
+    :param labels:
+    :return:
+    """
     num_entries = len(datasets)
     label_count = {}
+    print(datasets)
     for entry in datasets:
-        # 获取没一条数据的标签
-        current_feature = entry[-1]
-        if current_feature not in label_count.keys():
-            label_count[current_feature] = 0
-        label_count[current_feature] += 1
+        # 获取每一条数据的标签
+        current_label = entry[-1]
+        if current_label not in label_count.keys():
+            label_count[current_label] = 0
+        label_count[current_label] += 1
 
     shannon_ent = 0.0
     # 求香农信息熵
@@ -29,3 +37,65 @@ def shannon_ent(datasets, labels):
 
     return shannon_ent
 
+
+def split_dataset(dataset, index, value):
+    """
+    :param dataset: 待划分的数据集
+    :param index: index对应的列
+    :param value: index列对应的value值
+    :return res_data: 分割后的数据集
+    """
+    res_data = []
+    for ele in dataset:
+        if ele[index] == value:
+            # 获取不包含index列的数据
+            print(ele)
+            print(index)
+            res_data.append(ele[:index].extend(ele[index+1:]))
+    return res_data
+
+
+def best_feature_split(dataset):
+    """
+    :param dataset:
+    :return:
+
+    features =
+    """
+    # 获取feature的数量
+    features = len(dataset[0]) - 1
+
+    best_info_gain, best_feature = 0.0, -1
+
+    for i in range(features):
+        # 遍历特征,获取该特征的所有数据
+        feat_values= [ele[i] for ele in dataset]
+        # 去重
+        uniq_feat = set(feat_values)
+        # 子数据集的信息熵
+        new_entropy = 0.0
+        for feature in feat_values:
+            # 获取子数据集
+            sub_data = split_dataset(dataset, i, feature)
+            pro = len(sub_data) / float(len(dataset))
+            new_entropy += pro * shannon_ent(sub_data)
+
+        info_gain = best_info_gain - new_entropy
+
+        if info_gain > best_info_gain:
+            best_info_gain = info_gain
+            best_feature = i
+    return best_feature
+
+
+if __name__ == '__main__':
+    dataSet = [[1, 1, 'yes'],
+               [1, 1, 'yes'],
+               [1, 0, 'no'],
+               [0, 1, 'no'],
+               [0, 1, 'no']]
+    # dataset = np.array(dataSet)
+    dataset, labels = creat_data()
+    ent = shannon_ent(dataset)
+    print(ent)
+    print(best_feature_split(dataset))
