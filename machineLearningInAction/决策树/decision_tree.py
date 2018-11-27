@@ -21,7 +21,6 @@ def shannon_ent(datasets):
     """
     num_entries = len(datasets)
     label_count = {}
-    print(datasets)
     for entry in datasets:
         # 获取每一条数据的标签
         current_label = entry[-1]
@@ -49,9 +48,9 @@ def split_dataset(dataset, index, value):
     for ele in dataset:
         if ele[index] == value:
             # 获取不包含index列的数据
-            print(ele)
-            print(index)
-            res_data.append(ele[:index].extend(ele[index+1:]))
+            reduced_dataset = ele[:index]
+            reduced_dataset.extend(ele[index+1:])
+            res_data.append(reduced_dataset)
     return res_data
 
 
@@ -60,16 +59,17 @@ def best_feature_split(dataset):
     :param dataset:
     :return:
 
-    features =
     """
     # 获取feature的数量
     features = len(dataset[0]) - 1
 
     best_info_gain, best_feature = 0.0, -1
+    base_entroy = shannon_ent(dataset)
 
     for i in range(features):
         # 遍历特征,获取该特征的所有数据
         feat_values= [ele[i] for ele in dataset]
+        print(feat_values)
         # 去重
         uniq_feat = set(feat_values)
         # 子数据集的信息熵
@@ -80,11 +80,13 @@ def best_feature_split(dataset):
             pro = len(sub_data) / float(len(dataset))
             new_entropy += pro * shannon_ent(sub_data)
 
-        info_gain = best_info_gain - new_entropy
+        # 信息增益:原数据集的信息熵 - 分割后的数据集的信息熵
+        info_gain = base_entroy - new_entropy
 
         if info_gain > best_info_gain:
             best_info_gain = info_gain
             best_feature = i
+            print(best_info_gain, best_feature)
     return best_feature
 
 
@@ -97,5 +99,4 @@ if __name__ == '__main__':
     # dataset = np.array(dataSet)
     dataset, labels = creat_data()
     ent = shannon_ent(dataset)
-    print(ent)
     print(best_feature_split(dataset))
